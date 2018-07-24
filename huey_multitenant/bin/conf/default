@@ -1,0 +1,5 @@
+# Configure file for Invgate Discover instances
+# [HueyName]
+# python=/usr/sbin/python
+# script=/opt/djangoapp/manage.py
+# workers=1

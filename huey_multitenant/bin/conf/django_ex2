@@ -1,0 +1,4 @@
+[django2]
+python=/Users/hbruno/Projects/Invgate/neo-assets-dispatcher/.venv/bin/python
+script=/Users/hbruno/Projects/Invgate/neo-assets-dispatcher/examples/django_2/manage.py
+workers=1

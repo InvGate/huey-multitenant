@@ -1,0 +1,13 @@
+In one terminal, with the environment active run:
+
+    python dispatcherctl.py
+
+In another terminal, with the environment active:
+
+    ./manage.py shell
+
+Commands to try out:
+
+    from django_2.test_app.tasks import simple_task
+    res = simple_task(5)
+

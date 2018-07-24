@@ -1,0 +1,6 @@
+click==6.7
+huey==1.10.0
+redis==2.10.6
+
+# to run examples you must install:
+# django==1.11.8
