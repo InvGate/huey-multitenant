@@ -33,12 +33,15 @@ class HueyApplication(object):
 
         :return:
         """
-        schedule_pid = self.execute_command('makeschedule')
-        while self.is_running(schedule_pid):
-            time.sleep(0.1)
-            if os.path.isfile(os.path.join(os.path.dirname(self.script_path), 'schedule.info')):
-                self._logger.debug('Schedule info created')
-                break
+        schedule_process = self.execute_command('makeschedule')
+        while self.is_running(schedule_process):
+            time.sleep(0.5)
+
+        if os.path.isfile(os.path.join(os.path.dirname(self.script_path), 'schedule.info')):
+            self._logger.debug('Schedule info created')
+        else:
+            self._logger.debug('Schedule info not found')
+            return
 
         info_file = os.path.join(os.path.dirname(self.script_path), 'schedule.info')
         with open(info_file, 'r') as f:

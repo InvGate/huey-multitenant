@@ -17,15 +17,15 @@ def long_task(number):
     time.sleep(30) # Thirty seconds
     logger.debug('[TASK] finished')
 
-# @PeriodicTask(minute='*/1')
-# def one_minute_task():
-#     logger.debug('[TASK] Every One minute ')
-#
-# @PeriodicTask(minute='*/3')
-# def three_minute_task():
-#     logger.debug('[TASK] Every Three minutes')
-#
-# @PeriodicTask(minute='*/10')
-# def ten_minute_task():
-#     logger.debug('[TASK] Every Ten minutes')
+@PeriodicTask(minute='*/1')
+def one_minute_task():
+    logger.debug('[TASK] Every One minute ')
+
+@PeriodicTask(minute='*/3')
+def three_minute_task():
+    logger.debug('[TASK] Every Three minutes')
+
+@PeriodicTask(minute='*/10')
+def ten_minute_task():
+    logger.debug('[TASK] Every Ten minutes')
 

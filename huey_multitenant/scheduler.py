@@ -82,6 +82,6 @@ class Scheduler(BaseProcess):
         for app in self.instances:
             for task in app.get_periodic_tasks(now):
                 self._logger.info('Scheduling periodic task %s.', task)
-                app.execute_command(task['method'])
+                app.execute_command('enqueue_task {}'.format(task['method']))
 
         return True
