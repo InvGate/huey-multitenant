@@ -49,14 +49,16 @@ Activate virtualenv and launch the dispatcher:
 
     $ python dispatcherctl.py --consumers 4 --periodic true --verbose true
 
-This will create a schedule.info file inside each django instance with peridic task information and runs the dispatcher.
+This will create a schedule.info file inside each django instance with peridic tasks information and run the dispatcher.
 
 Examples
 ========
 
-To run examples check that redis server is up.
-Install Django
-Create a symbolic link inside your virtualenv site-packages to huey_multitenant folder.
+To run the examples make sure that the redis server is up.
+
+Install Django.
+
+Create a symbolic link inside your virtualenv site-packages to the huey_multitenant folder.
 
 Create django1.conf file inside bin/conf folder with this content (replace PATH):
 
@@ -77,13 +79,13 @@ Create django2.conf file inside bin/conf folder with this content (replace PATH)
     script=PATH/examples/django_2/manage.py
     workers=1
 
-Launch dispatcher in one therminal
+Launch the dispatcher in a terminal
 
 .. code-block:: console
 
     $ python dispatcherctl.py --consumers 4 --periodic true --verbose true
 
-En other terminal go to the examples/django_N folder and run
+In other terminal go to the examples/django_N folder and run
 
 .. code-block:: console
 
