@@ -25,30 +25,6 @@ class Scheduler(BaseProcess):
         self._cr = self._r
         self._next_loop = time.time()
 
-    def get_now(self):
-        if self.utc:
-            return datetime.datetime.utcnow()
-        return datetime.datetime.now()
-
-    def sleep_for_interval(self, start_ts, nseconds):
-        """
-        Sleep for a given interval with respect to the start timestamp.
-
-        So, if the start timestamp is 1337 and nseconds is 10, the method will
-        actually sleep for nseconds - (current_timestamp - start_timestamp). So
-        if the current timestamp is 1340, we'll only sleep for 7 seconds (the
-        goal being to sleep until 1347, or 1337 + 10).
-        """
-        sleep_time = nseconds - (time.time() - start_ts)
-        if sleep_time <= 0:
-            return
-        self._logger.debug('Sleeping for %s', sleep_time)
-        # Recompute time to sleep to improve accuracy in case the process was
-        # pre-empted by the kernel while logging.
-        sleep_time = nseconds - (time.time() - start_ts)
-        if sleep_time > 0:
-            time.sleep(sleep_time)
-
     def loop(self, now=None):
         current = self._next_loop
         self._next_loop += self.interval
