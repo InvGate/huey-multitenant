@@ -1,5 +1,5 @@
 import inspect
-from huey.contrib.djhuey import periodic_task
+from huey.contrib.djhuey import db_periodic_task
 from huey.api import crontab
 from huey_multitenant.registry import registry
 
@@ -21,15 +21,13 @@ class PeriodicTask(object):
             day = self.day,
             month = self.month
         )
-        def wrapped_f(*args):
-            f(*args)
-
-        return periodic_task(crontab(
-            month=self.month,
-            day=self.day,
-            day_of_week=self.day_of_week,
-            hour=self.hour,
-            minute=self.minute
-        ))(wrapped_f)
-
+        def wrapped_f(*args, **kwargs):
+            return db_periodic_task(crontab(
+                month=self.month,
+                day=self.day,
+                day_of_week=self.day_of_week,
+                hour=self.hour,
+                minute=self.minute
+            ))(f)
+        return wrapped_f()
 

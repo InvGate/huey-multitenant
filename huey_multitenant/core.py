@@ -74,6 +74,14 @@ class Dispatcher(object):
         self._logger = logging.getLogger()
 
     def load_config(self, conf_path):
+        if not os.path.isdir(conf_path):
+            self._logger.error('Applications not configured in %s', conf_path)
+            conf_path = os.path.join('/etc', 'huey.multitenant.conf')
+
+        if not os.path.isdir(conf_path):
+            self._logger.error('Applications not configured in %s', conf_path)
+            sys.exit(1)
+
         for conf in os.listdir(conf_path):
             if conf.endswith('.conf'):
                 parser = ConfigParser()

@@ -2,7 +2,7 @@ Huey Multitenant - A dispatcher that allows using huey with multiple django appl
 ========================================================================================
 
 I used this project with:
-- Python 2.7.10,
+- Python 2.7.10, Python 3.6.5
 - Redis 3.2.9,
 - Django 1.11.8 apps
 - Huey 1.10.0

@@ -1,4 +1,5 @@
-from huey.contrib.djhuey import task, db_task
+from huey.api import crontab
+from huey.contrib.djhuey import task, db_periodic_task
 from huey_multitenant.contrib.djhuey_multitenant import PeriodicTask
 
 import logging
@@ -13,6 +14,12 @@ def simple_task(number):
 
 @task()
 def long_task(number):
+    logger.debug('[TASK] Long with param (%s)' % number)
+    time.sleep(30) # Thirty seconds
+    logger.debug('[TASK] finished')
+
+@db_periodic_task(crontab(minute='1/*'))
+def hernan_periodic(number):
     logger.debug('[TASK] Long with param (%s)' % number)
     time.sleep(30) # Thirty seconds
     logger.debug('[TASK] finished')
