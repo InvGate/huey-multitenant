@@ -29,7 +29,7 @@ setup(
     ],
     entry_points={
         'console_scripts': [
-            'huey_multitenant_consumer = huey_multitenant.bin.dispatcherctl'
+            'huey_multitenant = huey_multitenant.bin.dispatcherctl:consumer_main'
         ]
     },
     scripts=['huey_multitenant/bin/dispatcherctl.py'],
