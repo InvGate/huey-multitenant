@@ -1,4 +1,7 @@
-import ConfigParser
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser  # ver. < 3.0
 import pickle
 import logging
 import os
@@ -73,12 +76,12 @@ class Dispatcher(object):
     def load_config(self, conf_path):
         for conf in os.listdir(conf_path):
             if conf.endswith('.conf'):
-                parser = ConfigParser.ConfigParser()
+                parser = ConfigParser()
                 parser.read(os.path.join(conf_path, conf))
                 for section in parser.sections():
                     instance = HueyApplication(
                         name=section,
-                        workers=int(parser.get(section, 'workers', 1)),
+                        workers=int(parser.get(section, 'workers')),
                         python_path=parser.get(section, 'python'),
                         script_path=parser.get(section, 'script'),
                     )
