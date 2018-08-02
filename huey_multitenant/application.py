@@ -131,4 +131,4 @@ class HueyConsumer():
 
     def consume(self):
         self.process = self.app.execute_command('run_huey --no-periodic -w %d' % self.app.workers)
-        threading.Timer(2, self.kill_consumer).start()
+        threading.Timer(1, self.kill_consumer).start()
