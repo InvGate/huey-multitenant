@@ -5,6 +5,10 @@ class TaskRegistry(object):
         self._registry = []
 
     def register(self, task, minute='*', hour='*', day_of_week='*', day='*', month='*'):
+        for item in self._registry:
+            if item['task'] == task:
+                return
+
         self._registry.append({
             'task': task,
             'minute': minute,
