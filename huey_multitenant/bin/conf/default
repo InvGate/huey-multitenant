@@ -3,3 +3,4 @@
 # python=/usr/sbin/python
 # script=/opt/djangoapp/manage.py
 # workers=1
+# settings=djangoapp.settings.production

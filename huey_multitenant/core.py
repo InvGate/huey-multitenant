@@ -84,12 +84,17 @@ class Dispatcher(object):
 
         for conf in os.listdir(conf_path):
             if conf.endswith('.conf'):
-                parser = ConfigParser()
+                parser = ConfigParser({
+                    'workers': '1',
+                    'settings': None
+                })
                 parser.read(os.path.join(conf_path, conf))
                 for section in parser.sections():
+
                     instance = HueyApplication(
                         name=section,
-                        workers=int(parser.get(section, 'workers')),
+                        workers=parser.get(section, 'workers'),
+                        settings=parser.get(section, 'settings'),
                         python_path=parser.get(section, 'python'),
                         script_path=parser.get(section, 'script'),
                     )

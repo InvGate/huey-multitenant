@@ -14,13 +14,14 @@ class HueyApplication(object):
     Huey App Instance
     """
 
-    def __init__(self, name, python_path, script_path, workers):
+    def __init__(self, name, python_path, script_path, workers, settings):
         self._logger = logging.getLogger()
         self._logger.info('Register App: %s', name)
 
         self.storage = RedisStorage(name)
         self.name = name
         self.workers = workers
+        self.settings = settings
         self.python_path = python_path
         self.script_path = script_path
 
@@ -130,5 +131,9 @@ class HueyConsumer():
         os.kill(self.process.pid, signal.SIGINT)
 
     def consume(self):
-        self.process = self.app.execute_command('run_huey --no-periodic -w %d' % self.app.workers)
+        run_cmd = 'run_huey --no-periodic %s' % self.app.workers
+        if self.app.settings is not None:
+            run_cmd = run_cmd + ' --settings %s' % self.app.settings
+
+        self.process = self.app.execute_command(run_cmd)
         threading.Timer(1, self.kill_consumer).start()
