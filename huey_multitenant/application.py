@@ -131,7 +131,7 @@ class HueyConsumer():
         os.kill(self.process.pid, signal.SIGINT)
 
     def consume(self):
-        run_cmd = 'run_huey --no-periodic %s' % self.app.workers
+        run_cmd = 'run_huey --no-periodic -w %s' % self.app.workers
         if self.app.settings is not None:
             run_cmd = run_cmd + ' --settings %s' % self.app.settings
 
