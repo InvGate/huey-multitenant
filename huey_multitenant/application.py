@@ -136,4 +136,7 @@ class HueyConsumer():
             run_cmd = run_cmd + ' --settings %s' % self.app.settings
 
         self.process = self.app.execute_command(run_cmd)
-        threading.Timer(1, self.kill_consumer).start()
+
+        # Wait 10 seconds until send the sigint signal.
+        # In that time the workers can handle more tasks
+        threading.Timer(10, self.kill_consumer).start()

@@ -114,8 +114,8 @@ class Dispatcher(object):
         return task_id, klass_str
 
     def task_exists(self, task_id):
-        for app in self.consumers:
-            if app.task_id == task_id:
+        for consumer in self.consumers:
+            if consumer.task_id == task_id:
                 return True
         return False
 
