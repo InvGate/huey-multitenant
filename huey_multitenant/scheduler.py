@@ -3,6 +3,9 @@ import datetime
 import time
 
 from huey.consumer import BaseProcess
+from huey.exceptions import ScheduleReadException
+from huey.exceptions import QueueWriteException
+
 
 class Scheduler(BaseProcess):
     """
@@ -31,6 +34,14 @@ class Scheduler(BaseProcess):
         if self._next_loop < time.time():
             self._logger.info('scheduler skipping iteration to avoid race.')
             return
+
+        try:
+            for app in self.instances:
+                task_list = app.get_schedule(now or self.get_now())
+                for task in task_list:
+                    self.enqueue_task(app, task)
+        except ScheduleReadException:
+            self._logger.exception('Error reading from task schedule.')
 
         # The scheduler has an interesting property of being able to run at
         # intervals that are not factors of 60. Suppose we ask our
@@ -61,3 +72,15 @@ class Scheduler(BaseProcess):
                 app.execute_command('enqueue_task {}'.format(task['method']))
 
         return True
+
+    def enqueue_task(self, app, task):
+        """
+        Convenience method for enqueueing a task.
+        """
+        try:
+            self._logger.info('Scheduling enqueue %s for execution', task)
+            app.storage.enqueue(task)
+        except QueueWriteException:
+            self._logger.exception('Error enqueueing task: %s', task)
+        else:
+            self._logger.debug('Enqueued task: %s', task)

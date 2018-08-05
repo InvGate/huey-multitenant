@@ -83,6 +83,9 @@ class HueyApplication(object):
         """
         return [task for task in self.periodic_tasks if task['validate_datetime'](now)]
 
+    def get_schedule(self, ts):
+        return self.storage.read_schedule(ts)
+
     def is_running(self, process):
         try:
             if process.poll() is None:
