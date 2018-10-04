@@ -78,7 +78,7 @@ class Scheduler(BaseProcess):
         Convenience method for enqueueing a task.
         """
         try:
-            self._logger.info('Scheduling enqueue %s for execution', task)
+            self._logger.info('Enqueue %s for execution', task)
             app.storage.enqueue(task)
         except QueueWriteException:
             self._logger.exception('Error enqueueing task: %s', task)

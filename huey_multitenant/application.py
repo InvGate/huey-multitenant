@@ -14,13 +14,17 @@ class HueyApplication(object):
     Huey App Instance
     """
 
-    def __init__(self, name, python_path, script_path, workers, settings):
+    def __init__(self, name, python_path, script_path, workers, worker_type, settings):
         self._logger = logging.getLogger()
-        self._logger.info('Register App: %s', name)
+        self._logger.info('\nRegister App: %s\nWorker Type: %s\nWorkers: %s', name, worker_type, workers)
 
         self.storage = RedisStorage(name)
         self.name = name
         self.workers = workers
+        if worker_type in ['process', 'greenlet']:
+            self.worker_type = worker_type
+        else:
+            self.worker_type = 'thread'
         self.settings = settings
         self.python_path = python_path
         self.script_path = script_path
@@ -55,7 +59,7 @@ class HueyApplication(object):
 
             info = ln.split()
             if len(info) == 6:
-                self._logger.debug('Added periodic method: %s', ln)
+                self._logger.info('Added periodic method: %s', ln)
                 self.periodic_tasks.append({
                     'method': info[5],
                     'validate_datetime': crontab(
@@ -108,7 +112,7 @@ class HueyApplication(object):
         if command:
             cmd.extend(command.split())
 
-        self._logger.debug('Execute: {}'.format(cmd))
+        self._logger.info('Execute: {}'.format(cmd))
 
         process = subprocess.Popen(
             cmd,
@@ -134,7 +138,7 @@ class HueyConsumer():
         os.kill(self.process.pid, signal.SIGINT)
 
     def consume(self):
-        run_cmd = 'run_huey --no-periodic -w %s' % self.app.workers
+        run_cmd = 'run_huey --no-periodic -k %s -w %s' % (self.app.worker_type, self.app.workers)
         if self.app.settings is not None:
             run_cmd = run_cmd + ' --settings %s' % self.app.settings
 

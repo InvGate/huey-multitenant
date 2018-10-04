@@ -68,6 +68,7 @@ Create django1.conf file inside bin/conf folder with this content (replace PATH)
     [django1]
     python=PATH/.venv/bin/python
     script=PATH/examples/django_1/manage.py
+    worker-type=thread
     workers=1
 
 
@@ -78,6 +79,7 @@ Create django2.conf file inside bin/conf folder with this content (replace PATH)
     [django2]
     python=PATH/.venv/bin/python
     script=PATH/examples/django_2/manage.py
+    worker-type=thread
     workers=1
 
 Launch the dispatcher in a terminal

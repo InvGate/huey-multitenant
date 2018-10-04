@@ -1,6 +1,7 @@
 from huey.contrib.djhuey import task
 from huey_multitenant.contrib.djhuey_multitenant import PeriodicTask
 
+from datetime import datetime
 import logging
 import time
 
@@ -8,24 +9,17 @@ logger = logging.getLogger(__name__)
 
 @task()
 def simple_task(number):
-    logger.debug('[TASK] simple_task with param (%d)' % number)
+    logger.debug('[APP 1] simple_task with param (%d)' % number)
     return number
 
-@task()
-def long_task(number):
-    logger.debug('[TASK] Long with param (%s)' % number)
-    time.sleep(30) # Thirty seconds
-    logger.debug('[TASK] finished')
+# @PeriodicTask(minute='*/1')
+# def one_minute_task():
+#     logger.debug('[TASK] Every One minute ')
+#
+# @PeriodicTask(minute='19')
+# def exact_task_one():
+#     logger.debug('[TASK] Every N minutes')
 
-@PeriodicTask(minute='*/1')
-def one_minute_task():
-    logger.debug('[TASK] Every One minute ')
-
-@PeriodicTask(minute='*/3')
-def three_minute_task():
-    logger.debug('[TASK] Every Three minutes')
-
-@PeriodicTask(minute='*/10')
-def ten_minute_task():
-    logger.debug('[TASK] Every Ten minutes')
-
+@PeriodicTask()
+def every_minute():
+    logger.debug('{}:{} [APP 1] Every minute'.format(datetime.now().hour, datetime.now().minute))

@@ -86,6 +86,7 @@ class Dispatcher(object):
             if conf.endswith('.conf'):
                 parser = ConfigParser({
                     'workers': '1',
+                    'worker-type': 'thread',
                     'settings': None
                 })
                 parser.read(os.path.join(conf_path, conf))
@@ -94,6 +95,7 @@ class Dispatcher(object):
                     instance = HueyApplication(
                         name=section,
                         workers=parser.get(section, 'workers'),
+                        worker_type=parser.get(section, 'worker-type'),
                         settings=parser.get(section, 'settings'),
                         python_path=parser.get(section, 'python'),
                         script_path=parser.get(section, 'script'),

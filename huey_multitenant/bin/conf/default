@@ -3,4 +3,6 @@
 # python=/usr/sbin/python
 # script=/opt/djangoapp/manage.py
 # workers=1
+# worker-type=[thread|process|greenlet]
 # settings=djangoapp.settings.production
+

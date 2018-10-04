@@ -1,31 +1,29 @@
-from huey.contrib.djhuey import task, db_task
+from huey.contrib.djhuey import task
 from huey_multitenant.contrib.djhuey_multitenant import PeriodicTask
 
 import logging
-import time
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
-def no_task(number):
-    logger.debug('[NO TASK](%d)' % number)
-    return number
-
 @task()
 def simple_task(number):
-    logger.debug('[TASK] simple_task with param (%d)' % number)
+    logger.debug('[APP 2] simple_task with param (%d)' % number)
     return number
 
-@db_task()
-def long_task(number):
-    logger.debug('[TASK] Long with param (%s)' % number)
-    time.sleep(30) # Thirty seconds
-    logger.debug('[TASK] finished')
+@PeriodicTask()
+def every_minute_task():
+    logger.debug('{}:{} [APP 2] Every minute'.format(datetime.now().hour, datetime.now().minute))
 
 @PeriodicTask(minute='*/2')
 def two_minute_task():
-    logger.debug('[TASK] Every Two minutes ')
+    logger.debug('{}:{} [APP 2] Every two minute'.format(datetime.now().hour, datetime.now().minute))
 
-@PeriodicTask(minute='*/3')
-def three_minute_task():
-    logger.debug('[TASK] Every Three minutes')
+#
+# @PeriodicTask(minute='21')
+# def exact_task_one():
+#     logger.debug('[TASK] Every N minutes')
 
+# @PeriodicTask(minute='45')
+# def exact_task_two():
+#     logger.debug('[TASK] Every NN minutes')
