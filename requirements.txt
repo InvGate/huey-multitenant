@@ -1,6 +1,9 @@
 click==6.7
-huey==1.10.0
+huey==1.10.3
 redis==2.10.6
+
+# to run check_health
+sentry-sdk==0.4.1
 
 # to run examples you must install:
 # django==1.11.8
