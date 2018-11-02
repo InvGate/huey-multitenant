@@ -2,13 +2,15 @@ try:
     from configparser import ConfigParser
 except ImportError:
     from ConfigParser import ConfigParser  # ver. < 3.0
-import pickle
 import logging
 import os
+import pickle
 import sys
 import time
+from logging import FileHandler
 
 from huey.consumer import ProcessEnvironment
+
 from huey_multitenant.application import HueyApplication, HueyConsumer
 from huey_multitenant.scheduler import Scheduler
 
@@ -17,13 +19,13 @@ class Dispatcher(object):
     """
     Main Dispatcher
     """
-    def __init__(self, conf_path, max_consumers, periodic, verbose):
+    def __init__(self, conf_path, max_consumers, periodic, verbose, logfile=None):
         self._total_consumers = max_consumers
         self.is_verbose = verbose
         self.tasks = []
         self.instances = []
         self.consumers = []
-        self.setup_logger()
+        self.setup_logger(logfile)
 
         self._logger.debug('Init Dispatcher')
         self._logger.debug('- Consumers = %d', max_consumers)
@@ -67,11 +69,17 @@ class Dispatcher(object):
             return logging.INFO
         return logging.DEBUG if self.is_verbose else logging.ERROR
 
-    def setup_logger(self):
+    def setup_logger(self, logfile):
         logformat = ('[%(asctime)s] %(levelname)s: %(message)s')
         loglevel = self.loglevel
         logging.basicConfig(level=loglevel, format=logformat)
         self._logger = logging.getLogger()
+
+        if logfile:
+            handler = FileHandler(logfile)
+            handler.setFormatter(logging.Formatter(logformat))
+            self._logger.addHandler(handler)
+
 
     def load_config(self, conf_path):
         if not os.path.isdir(conf_path):
