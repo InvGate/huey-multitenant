@@ -112,6 +112,9 @@ class HueyApplication(object):
         if command:
             cmd.extend(command.split())
 
+        if self.settings is not None:
+            cmd.extend(['--settings', self.settings])
+
         self._logger.info('Execute: {}'.format(cmd))
 
         process = subprocess.Popen(
