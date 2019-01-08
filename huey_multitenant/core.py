@@ -129,8 +129,16 @@ class Dispatcher(object):
                 return True
         return False
 
+    def instance_is_active(self, instance):
+        for consumer in self.consumers:
+            if consumer.app == instance:
+                return True
+        return False
+
     def consume_task(self):
         for idx, _instance in enumerate(self.instances):
+            if self.instance_is_active(_instance):
+                continue
             tasks = _instance.get_pending_tasks()
             for _task in tasks:
                 task_id, task_klass = self.get_task_data(_task)

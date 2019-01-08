@@ -90,17 +90,6 @@ class HueyApplication(object):
     def get_schedule(self, ts):
         return self.storage.read_schedule(ts)
 
-    def is_running(self, process):
-        try:
-            if process.poll() is None:
-                return True
-            else:
-                process.communicate()
-            # os.kill(process.pid, 0)
-        except OSError:
-            return False
-        return False
-
     def execute_command(self, command):
         """
         Execute manage.py command.
@@ -135,7 +124,16 @@ class HueyConsumer():
         self.consume()
 
     def is_running(self):
-        return self.app.is_running(self.process)
+        try:
+            if self.process.poll() is None:
+                return True
+            else:
+                self.process.communicate()
+            # os.kill(process.pid, 0)
+        except OSError:
+            return False
+
+        return False
 
     def kill_consumer(self):
         os.kill(self.process.pid, signal.SIGINT)
@@ -147,6 +145,6 @@ class HueyConsumer():
 
         self.process = self.app.execute_command(run_cmd)
 
-        # Wait 10 seconds until send the sigint signal.
+        # Wait 5 seconds until send the sigint signal.
         # In that time the workers can handle more tasks
-        threading.Timer(10, self.kill_consumer).start()
+        threading.Timer(5, self.kill_consumer).start()
