@@ -90,6 +90,17 @@ class HueyApplication(object):
     def get_schedule(self, ts):
         return self.storage.read_schedule(ts)
 
+    def is_running(self, process):
+        try:
+            if process.poll() is None:
+                return True
+            else:
+                process.communicate()
+            # os.kill(process.pid, 0)
+        except OSError:
+            return False
+        return False
+
     def execute_command(self, command):
         """
         Execute manage.py command.
@@ -124,16 +135,7 @@ class HueyConsumer():
         self.consume()
 
     def is_running(self):
-        try:
-            if self.process.poll() is None:
-                return True
-            else:
-                self.process.communicate()
-            # os.kill(process.pid, 0)
-        except OSError:
-            return False
-
-        return False
+        return self.app.is_running(self.process)
 
     def kill_consumer(self):
         os.kill(self.process.pid, signal.SIGINT)
