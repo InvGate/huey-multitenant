@@ -144,7 +144,7 @@ class Dispatcher(object):
                 task_id, task_klass = self.get_task_data(_task)
 
                 if not self.task_exists(task_id):
-                    self._logger.debug('Consume task: %s %s', task_klass, task_id)
+                    self._logger.info('Consume task: %s %s', task_klass, task_id)
                     self.consumers.append(HueyConsumer(_instance, task_id))
                     if len(self.instances) > 1:
                         self.instances.append(self.instances.pop(idx))

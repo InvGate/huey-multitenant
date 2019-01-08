@@ -101,6 +101,10 @@ class HueyApplication(object):
             return False
         return False
 
+    def kill_process(self, process):
+        self._logger.info('[{}] kill_huey PID: {}'.format(self.name, process.pid))
+        os.kill(process.pid, signal.SIGINT)
+
     def execute_command(self, command):
         """
         Execute manage.py command.
@@ -115,7 +119,7 @@ class HueyApplication(object):
         if self.settings is not None:
             cmd.extend(['--settings', self.settings])
 
-        self._logger.info('Execute: {}'.format(cmd))
+        self._logger.debug('[{}] Execute: {}'.format(self.name, cmd))
 
         process = subprocess.Popen(
             cmd,
@@ -123,7 +127,11 @@ class HueyApplication(object):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE)
 
-        self._logger.debug('PID: {}'.format(process.pid))
+        process_name = cmd[2]
+        if process_name == 'enqueue_task':
+            process_name = '{} {}'.format(process_name, cmd[3])
+
+        self._logger.info('[{}] {} PID: {}'.format(self.name, process_name, process.pid))
         return process
 
 
@@ -138,15 +146,13 @@ class HueyConsumer():
         return self.app.is_running(self.process)
 
     def kill_consumer(self):
-        os.kill(self.process.pid, signal.SIGINT)
+        self.app.kill_process(self.process)
 
     def consume(self):
         run_cmd = 'run_huey --no-periodic -k %s -w %s' % (self.app.worker_type, self.app.workers)
-        if self.app.settings is not None:
-            run_cmd = run_cmd + ' --settings %s' % self.app.settings
 
         self.process = self.app.execute_command(run_cmd)
 
-        # Wait 5 seconds until send the sigint signal.
+        # Wait 10 seconds until send the sigint signal.
         # In that time the workers can handle more tasks
-        threading.Timer(5, self.kill_consumer).start()
+        threading.Timer(10, self.kill_consumer).start()
