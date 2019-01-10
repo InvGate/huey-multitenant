@@ -33,8 +33,9 @@ class ExecuteConsumer(Consumer):
         # Log startup message.
         self._logger.info('Huey consumer started with %s %s, PID %s',
                           self.workers, self.worker_type, os.getpid())
-        self._logger.info('Scheduler runs every %s second(s).',
-                          self.scheduler_interval)
+        self._logger.info('Scheduler disabled')
+        self._logger.info('Health checker is %s',
+                          'enabled' if self._health_check else 'disabled')
         self._logger.info('Periodic tasks are %s.',
                           'enabled' if self.periodic else 'disabled')
         self._logger.info('UTC is %s.', 'enabled' if self.utc else 'disabled')

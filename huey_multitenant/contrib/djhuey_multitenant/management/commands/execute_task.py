@@ -75,8 +75,11 @@ class Command(BaseCommand):
 
         consumer_options.setdefault('verbose',
                                     consumer_options.pop('huey_verbose', None))
-        consumer_options['periodic'] = False
         self.autodiscover()
+
+        consumer_options['workers'] = 1
+        consumer_options['periodic'] = False
+        consumer_options['check_worker_health'] = False
 
         config = ConsumerConfig(**consumer_options)
         config.validate()
