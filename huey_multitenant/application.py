@@ -103,7 +103,7 @@ class HueyApplication(object):
 
     def kill_process(self, process):
         self._logger.info('[{}] kill_huey PID: {}'.format(self.name, process.pid))
-        os.kill(process.pid, signal.SIGINT)
+        os.kill(process.pid, signal.SIGKILL)
 
     def execute_command(self, command):
         """
@@ -149,10 +149,10 @@ class HueyConsumer():
         self.app.kill_process(self.process)
 
     def consume(self):
-        run_cmd = 'run_huey --no-periodic -k %s -w %s' % (self.app.worker_type, self.app.workers)
+        run_cmd = 'execute_task --no-periodic -k %s -w %s' % (self.app.worker_type, self.app.workers)
 
         self.process = self.app.execute_command(run_cmd)
 
         # Wait 10 seconds until send the sigint signal.
         # In that time the workers can handle more tasks
-        threading.Timer(10, self.kill_consumer).start()
+        # threading.Timer(10, self.kill_consumer).start()
