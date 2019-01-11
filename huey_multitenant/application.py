@@ -1,3 +1,4 @@
+import datetime
 import subprocess
 import logging
 import os
@@ -8,6 +9,8 @@ import time
 from huey.storage import RedisStorage
 from huey import crontab
 
+
+MAX_SECONDS_RUNNING = 15 * 60   # 15 minutes
 
 class HueyApplication(object):
     """
@@ -140,10 +143,17 @@ class HueyConsumer():
         self.app = instance
         self.task_id = task_id
         self.process = None
+        self.start_at = datetime.datetime.now()
         self.consume()
 
     def is_running(self):
-        return self.app.is_running(self.process)
+        running = self.app.is_running(self.process)
+        if running:
+            if (datetime.datetime.now() - self.start_at).seconds > MAX_SECONDS_RUNNING:
+                self.start_at = datetime.datetime.now()
+                self.kill_consumer()
+
+        return running
 
     def kill_consumer(self):
         self.app.kill_process(self.process)
