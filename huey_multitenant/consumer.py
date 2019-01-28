@@ -61,7 +61,7 @@ class ExecuteConsumer(Consumer):
         """
         start_time = time.time()
         self.start()
-        # time.sleep(5.0)
+        time.sleep(1.0)
         for _, worker_process in self.worker_threads:
             worker_process.join()
         self._logger.info('Stop consumer. %s seconds' % (time.time() - start_time))
