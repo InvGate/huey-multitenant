@@ -2,6 +2,7 @@ from __future__ import unicode_literals, absolute_import
 
 from huey.consumer import Consumer
 from huey.exceptions import ConfigurationError
+import time
 import threading
 import os
 import signal
@@ -24,6 +25,7 @@ class ExecuteConsumer(Consumer):
     def start(self):
         """
         Start all consumer processes and register signal handlers.
+        Don't init scheduler.
         """
         if self.huey.always_eager:
             raise ConfigurationError(
@@ -53,4 +55,13 @@ class ExecuteConsumer(Consumer):
         if hasattr(signal, 'SIGHUP'):
             signal.signal(signal.SIGHUP, original_sighup_handler)
 
-        threading.Timer(1.0, self.stop, {'graceful': True}).start()
+    def run(self):
+        """
+        Run the consumer.
+        """
+        start_time = time.time()
+        self.start()
+        # time.sleep(5.0)
+        for _, worker_process in self.worker_threads:
+            worker_process.join()
+        self._logger.info('Stop consumer. %s seconds' % (time.time() - start_time))

@@ -1,6 +1,0 @@
-[django-1]
-python=/Users/hbruno/Projects/Invgate/neo-assets-dispatcher/.venv/bin/python
-script=/Users/hbruno/Projects/Invgate/neo-assets-dispatcher/examples/django_1/manage.py
-workers=2
-worker-type=thread
-settings=django_1.settings
