@@ -42,23 +42,14 @@ class ExecuteConsumer(Consumer):
                           'enabled' if self.periodic else 'disabled')
         self._logger.info('UTC is %s.', 'enabled' if self.utc else 'disabled')
 
-        self._set_signal_handlers()
-
-        original_sigint_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
-        if hasattr(signal, 'SIGHUP'):
-            original_sighup_handler = signal.signal(signal.SIGHUP, signal.SIG_IGN)
-
         for _, worker_process in self.worker_threads:
             worker_process.start()
-
-        signal.signal(signal.SIGINT, original_sigint_handler)
-        if hasattr(signal, 'SIGHUP'):
-            signal.signal(signal.SIGHUP, original_sighup_handler)
 
     def run(self):
         """
         Run the consumer.
         """
+        self._logger.info('Start consumer.')
         start_time = time.time()
         self.start()
         time.sleep(1.0)
@@ -66,3 +57,4 @@ class ExecuteConsumer(Consumer):
         for _, worker_process in self.worker_threads:
             worker_process.join()
         self._logger.info('Stop consumer. %s seconds' % (time.time() - start_time))
+        exit(0)
