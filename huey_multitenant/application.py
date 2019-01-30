@@ -126,9 +126,7 @@ class HueyApplication(object):
 
         process = subprocess.Popen(
             cmd,
-            shell=False,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE)
+            shell=False)
 
         process_name = cmd[2]
         if process_name == 'enqueue_task':
@@ -138,7 +136,7 @@ class HueyApplication(object):
         return process
 
 
-class HueyConsumer():
+class HueyConsumer:
     def __init__(self, instance, task_id):
         self.app = instance
         self.task_id = task_id
