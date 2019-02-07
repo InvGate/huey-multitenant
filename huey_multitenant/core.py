@@ -181,25 +181,3 @@ class Dispatcher(object):
         self._logger.info('Shutting down')
 
 
-if __name__ == '__main__':
-    conf_path = '/Users/hbruno/Projects/Invgate/neo-assets-dispatcher/huey_multitenant/bin/conf'
-    conf = 'discover.conf'
-    parser = ConfigParser({
-        'workers': '1',
-        'worker-type': 'thread',
-        'settings': None,
-        'redis_protocol': 'redis',
-        'redis_host': 'localhost',
-        'redis_port': '6379',
-        'redis_prefix': None
-    })
-
-    parser.read(os.path.join(conf_path, conf))
-    for section in parser.sections():
-        print section
-        print parser.get(section, 'redis_prefix') or section
-        print parser.get(section, 'redis_protocol')
-        print parser.get(section, 'redis_host')
-        print parser.get(section, 'redis_port')
-
-
