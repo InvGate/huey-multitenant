@@ -12,16 +12,29 @@ from huey import crontab
 
 MAX_SECONDS_RUNNING = 15 * 60   # 15 minutes
 
+
 class HueyApplication(object):
     """
     Huey App Instance
     """
 
-    def __init__(self, name, python_path, script_path, workers, worker_type, settings):
+    def __init__(self,
+                 name,
+                 python_path,
+                 script_path,
+                 workers,
+                 worker_type,
+                 settings,
+                 redis_host,
+                 redis_port,
+                 redis_prefix):
         self._logger = logging.getLogger()
         self._logger.info('\nRegister App: %s\nWorker Type: %s\nWorkers: %s', name, worker_type, workers)
 
-        self.storage = RedisStorage(name)
+        self.storage = RedisStorage(
+            name=redis_prefix,
+            host=redis_host,
+            port=redis_port)
         self.name = name
         self.workers = workers
         if worker_type in ['process', 'greenlet']:

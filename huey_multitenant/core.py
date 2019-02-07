@@ -95,18 +95,25 @@ class Dispatcher(object):
                 parser = ConfigParser({
                     'workers': '1',
                     'worker-type': 'thread',
-                    'settings': None
+                    'settings': None,
+                    'redis_host': 'localhost',
+                    'redis_port': '6379',
+                    'redis_prefix': None
                 })
+
                 parser.read(os.path.join(conf_path, conf))
                 for section in parser.sections():
 
                     instance = HueyApplication(
-                        name=section,
+                        name=parser.get(section, 'redis_prefix'),
+                        python_path=parser.get(section, 'python'),
+                        script_path=parser.get(section, 'script'),
                         workers=parser.get(section, 'workers'),
                         worker_type=parser.get(section, 'worker-type'),
                         settings=parser.get(section, 'settings'),
-                        python_path=parser.get(section, 'python'),
-                        script_path=parser.get(section, 'script'),
+                        redis_host=parser.get(section, 'redis_host'),
+                        redis_port=parser.get(section, 'redis_port'),
+                        redis_prefix=parser.get(section, 'redis_prefix') or section,
                     )
                     self.instances.append(instance)
 
@@ -172,5 +179,27 @@ class Dispatcher(object):
 
     def stop(self):
         self._logger.info('Shutting down')
+
+
+if __name__ == '__main__':
+    conf_path = '/Users/hbruno/Projects/Invgate/neo-assets-dispatcher/huey_multitenant/bin/conf'
+    conf = 'discover.conf'
+    parser = ConfigParser({
+        'workers': '1',
+        'worker-type': 'thread',
+        'settings': None,
+        'redis_protocol': 'redis',
+        'redis_host': 'localhost',
+        'redis_port': '6379',
+        'redis_prefix': None
+    })
+
+    parser.read(os.path.join(conf_path, conf))
+    for section in parser.sections():
+        print section
+        print parser.get(section, 'redis_prefix') or section
+        print parser.get(section, 'redis_protocol')
+        print parser.get(section, 'redis_host')
+        print parser.get(section, 'redis_port')
 
 
