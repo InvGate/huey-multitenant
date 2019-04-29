@@ -3,9 +3,7 @@ from __future__ import unicode_literals, absolute_import
 from huey.consumer import Consumer
 from huey.exceptions import ConfigurationError
 import time
-import threading
 import os
-import signal
 
 
 class ExecuteConsumer(Consumer):

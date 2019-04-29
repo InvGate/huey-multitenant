@@ -25,13 +25,15 @@ class Dispatcher(object):
         self.tasks = []
         self.instances = []
         self.consumers = []
+
         self.setup_logger(logfile)
 
-        self._logger.debug('Init Dispatcher')
-        self._logger.debug('- Consumers = %d', max_consumers)
-        self._logger.debug('- Periodic  = %s', 'enabled' if periodic else 'disabled')
-        self._logger.debug('- Verbose   = %s', 'enabled' if verbose else 'disabled')
+        self._logger.info('Init Dispatcher')
+        self._logger.info('- Consumers = %d', max_consumers)
+        self._logger.info('- Periodic  = %s', 'enabled' if periodic else 'disabled')
+        self._logger.info('- Verbose   = %s', 'enabled' if verbose else 'disabled')
 
+        self.setup_sentry(conf_path)
         self.load_config(conf_path)
 
         # Create the scheduler process (but don't start it yet).
@@ -45,7 +47,7 @@ class Dispatcher(object):
     def _create_scheduler(self):
         return Scheduler(
             instances=self.instances,
-            interval=45,
+            interval=60,
             utc=True)
 
     def _create_process(self, process, name):
@@ -80,6 +82,17 @@ class Dispatcher(object):
             handler.setFormatter(logging.Formatter(logformat))
             self._logger.addHandler(handler)
 
+    def setup_sentry(self, conf_path):
+        key_path = os.path.join(conf_path, 'sentry.key')
+        if os.path.isfile(key_path):
+            with open(key_path, 'r') as f:
+                sentry_key = f.read()
+
+            self._logger.info('- Sentry initialized (%s)', sentry_key)
+            import sentry_sdk
+            sentry_sdk.init(sentry_key)
+        else:
+            self._logger.info('- Sentry not initialized')
 
     def load_config(self, conf_path):
         if not os.path.isdir(conf_path):
@@ -90,7 +103,11 @@ class Dispatcher(object):
             self._logger.error('Applications not configured in %s', conf_path)
             sys.exit(1)
 
-        for conf in os.listdir(conf_path):
+        all_conf = os.listdir(conf_path)
+        for conf in all_conf:
+            self._logger.info(conf)
+
+        for conf in all_conf:
             if conf.endswith('.conf'):
                 parser = ConfigParser({
                     'workers': '1',
@@ -158,8 +175,8 @@ class Dispatcher(object):
                     return
 
     def start(self):
-        self._logger.debug('Start Dispatcher')
-        timeout = 0.1
+        self._logger.info('Start Dispatcher')
+        timeout = 0.5
         while True:
             try:
                 time.sleep(timeout)
