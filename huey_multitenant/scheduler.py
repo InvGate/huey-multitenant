@@ -1,5 +1,7 @@
 import logging
+import pickle
 import datetime
+import uuid
 import time
 
 from huey.consumer import BaseProcess
@@ -68,8 +70,17 @@ class Scheduler(BaseProcess):
     def enqueue_periodic_tasks(self, now, start):
         for app in self.instances:
             for task in app.get_periodic_tasks(now):
+                # TODO: En lugar de llamar al comando enqueue_task se genera la entrada en Redis a mano.
                 self._logger.info('Scheduling periodic task %s.', task)
-                app.execute_command('enqueue_task {}'.format(task['method']))
+                msg = pickle.dumps((
+                    str(uuid.uuid4()),
+                    'queue_task_{}'.format(task['method'].split('.')[-1]),
+                    None,
+                    0,
+                    0,
+                    ((), {}),
+                    None))
+                app.storage.enqueue(msg)
 
         return True
 
