@@ -79,7 +79,7 @@ class Scheduler(BaseProcess):
                     0,
                     0,
                     ((), {}),
-                    None))
+                    None), protocol=2)
                 app.storage.enqueue(msg)
 
         return True
