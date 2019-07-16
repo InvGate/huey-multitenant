@@ -118,7 +118,7 @@ class HueyApplication(object):
         return False
 
     def kill_process(self, process):
-        self._logger.info('[{}] kill_huey PID: {}'.format(self.name, process.pid))
+        self._logger.error('[{}] kill_huey PID: {}'.format(self.name, process.pid))
         os.kill(process.pid, signal.SIGKILL)
 
     def execute_command(self, command):
