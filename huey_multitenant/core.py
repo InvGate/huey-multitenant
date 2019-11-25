@@ -196,5 +196,3 @@ class Dispatcher(object):
 
     def stop(self):
         self._logger.info('Shutting down')
-
-
