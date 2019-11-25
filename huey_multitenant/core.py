@@ -1,7 +1,5 @@
-try:
-    from configparser import ConfigParser
-except ImportError:
-    from ConfigParser import ConfigParser  # ver. < 3.0
+
+from configparser import ConfigParser
 import logging
 import os
 import pickle
@@ -109,13 +107,14 @@ class Dispatcher(object):
 
         for conf in all_conf:
             if conf.endswith('.conf'):
-                parser = ConfigParser({
+                parser = ConfigParser(defaults={
                     'workers': '1',
                     'worker-type': 'thread',
                     'settings': None,
                     'redis_host': 'localhost',
                     'redis_port': '6379',
-                    'redis_prefix': None
+                    'redis_prefix': None,
+                    'use_python3': False
                 })
 
                 parser.read(os.path.join(conf_path, conf))
@@ -131,6 +130,7 @@ class Dispatcher(object):
                         redis_host=parser.get(section, 'redis_host'),
                         redis_port=parser.get(section, 'redis_port'),
                         redis_prefix=parser.get(section, 'redis_prefix') or section,
+                        use_python3=parser.getboolean(section, 'use_python3', fallback=False)
                     )
                     self.instances.append(instance)
 

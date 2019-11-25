@@ -1,12 +1,11 @@
 import logging
 import pickle
-import datetime
-import uuid
 import time
+import uuid
 
 from huey.consumer import BaseProcess
-from huey.exceptions import ScheduleReadException
 from huey.exceptions import QueueWriteException
+from huey.exceptions import ScheduleReadException
 
 
 class Scheduler(BaseProcess):
@@ -69,17 +68,22 @@ class Scheduler(BaseProcess):
 
     def enqueue_periodic_tasks(self, now, start):
         for app in self.instances:
+            # Defino el protocolo de pickle que tengo que usar para serializar las tareas
+            # Ver https://docs.python.org/3/library/pickle.html#data-stream-format
+            pickle_protocol = 3 if app.use_python3 else 2
             for task in app.get_periodic_tasks(now):
-                # TODO: En lugar de llamar al comando enqueue_task se genera la entrada en Redis a mano.
                 self._logger.info('Scheduling periodic task %s.', task)
-                msg = pickle.dumps((
+                # En lugar de llamar al comando enqueue_task se genera la entrada en Redis a mano.
+                task_data = (
                     str(uuid.uuid4()),
                     'queue_task_{}'.format(task['method'].split('.')[-1]),
                     None,
                     0,
                     0,
                     ((), {}),
-                    None), protocol=2)
+                    None
+                )
+                msg = pickle.dumps(task_data, protocol=pickle_protocol)
                 app.storage.enqueue(msg)
 
         return True

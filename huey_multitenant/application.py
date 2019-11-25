@@ -27,7 +27,8 @@ class HueyApplication(object):
                  settings,
                  redis_host,
                  redis_port,
-                 redis_prefix):
+                 redis_prefix,
+                 use_python3=False):
         self._logger = logging.getLogger()
         self._logger.info('\nRegister App: %s\nWorker Type: %s\nWorkers: %s', name, worker_type, workers)
 
@@ -46,6 +47,7 @@ class HueyApplication(object):
         self.script_path = script_path
 
         self.periodic_tasks = []
+        self.use_python3 = use_python3
         self.load_periodic_tasks()
 
     def load_periodic_tasks(self):
