@@ -114,7 +114,7 @@ class Dispatcher(object):
                     'redis_host': 'localhost',
                     'redis_port': '6379',
                     'redis_prefix': None,
-                    'use_python3': False
+                    'use_python3': 'false'
                 })
 
                 parser.read(os.path.join(conf_path, conf))
