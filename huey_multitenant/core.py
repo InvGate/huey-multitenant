@@ -5,7 +5,7 @@ import os
 import pickle
 import sys
 import time
-from logging import FileHandler
+from logging.handlers import RotatingFileHandler
 
 from huey.consumer import ProcessEnvironment
 
@@ -66,8 +66,8 @@ class Dispatcher(object):
     @property
     def loglevel(self):
         if self.is_verbose is False:
-            return logging.INFO
-        return logging.DEBUG if self.is_verbose else logging.ERROR
+            return logging.ERROR
+        return logging.DEBUG
 
     def setup_logger(self, logfile):
         logformat = ('[%(asctime)s] %(levelname)s: %(message)s')
@@ -76,7 +76,7 @@ class Dispatcher(object):
         self._logger = logging.getLogger()
 
         if logfile:
-            handler = FileHandler(logfile)
+            handler = RotatingFileHandler(logfile, maxBytes=1024 * 1024 * 100, backupCount=10)
             handler.setFormatter(logging.Formatter(logformat))
             self._logger.addHandler(handler)
 
@@ -103,10 +103,8 @@ class Dispatcher(object):
 
         all_conf = os.listdir(conf_path)
         for conf in all_conf:
-            self._logger.info(conf)
-
-        for conf in all_conf:
             if conf.endswith('.conf'):
+                self._logger.info(conf)
                 parser = ConfigParser(defaults={
                     'workers': '1',
                     'worker-type': 'thread',
