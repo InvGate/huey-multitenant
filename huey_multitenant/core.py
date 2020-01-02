@@ -12,11 +12,12 @@ from huey.consumer import ProcessEnvironment
 from huey_multitenant.application import HueyApplication, HueyConsumer
 from huey_multitenant.scheduler import Scheduler
 
+LOGGER_NAME = 'huey-multitenant'
 
 class Dispatcher(object):
     """
     Main Dispatcher
-    """
+    """    
     def __init__(self, conf_path, max_consumers, periodic, verbose, logfile=None):
         self._total_consumers = max_consumers
         self.is_verbose = verbose
@@ -65,15 +66,15 @@ class Dispatcher(object):
 
     @property
     def loglevel(self):
-        if self.is_verbose is False:
-            return logging.ERROR
-        return logging.DEBUG
+        if self.is_verbose is True:
+            return logging.DEBUG
+        return logging.ERROR
 
     def setup_logger(self, logfile):
         logformat = ('[%(asctime)s] %(levelname)s: %(message)s')
         loglevel = self.loglevel
         logging.basicConfig(level=loglevel, format=logformat)
-        self._logger = logging.getLogger()
+        self._logger = logging.getLogger(name=LOGGER_NAME)
 
         if logfile:
             handler = RotatingFileHandler(logfile, maxBytes=1024 * 1024 * 100, backupCount=10)
@@ -117,7 +118,7 @@ class Dispatcher(object):
 
                 parser.read(os.path.join(conf_path, conf))
                 for section in parser.sections():
-
+                    
                     instance = HueyApplication(
                         name=parser.get(section, 'redis_prefix'),
                         python_path=parser.get(section, 'python'),
@@ -128,6 +129,7 @@ class Dispatcher(object):
                         redis_host=parser.get(section, 'redis_host'),
                         redis_port=parser.get(section, 'redis_port'),
                         redis_prefix=parser.get(section, 'redis_prefix') or section,
+                        logger_name=LOGGER_NAME,
                         use_python3=parser.getboolean(section, 'use_python3', fallback=False)
                     )
                     self.instances.append(instance)

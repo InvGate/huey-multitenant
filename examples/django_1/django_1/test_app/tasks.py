@@ -13,6 +13,12 @@ def simple_task(number):
     return number
 
 @task()
+def simple_log():
+    logger.debug('[APP 1] debug')
+    logger.info('[APP 1] info')
+    logger.error('[APP 1] error' )
+
+@task()
 def long_task(number):
     logger.debug('[APP 1] long_task with param (%d)' % number)
     time.sleep(number)

@@ -30,27 +30,11 @@ LOGGING = {
         'console': {
             'class': 'logging.StreamHandler',
         },
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(ROOT, 'debug.log'),
-        },
     },
     'loggers': {
         '': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'huey': {
             'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
+            'level': 'DEBUG'
         },
     },
 }

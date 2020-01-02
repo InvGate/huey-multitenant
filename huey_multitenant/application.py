@@ -28,8 +28,9 @@ class HueyApplication(object):
                  redis_host,
                  redis_port,
                  redis_prefix,
+                 logger_name='',                    
                  use_python3=False):
-        self._logger = logging.getLogger()
+        self._logger = logging.getLogger(logger_name)
         self._logger.info('\nRegister App: %s\nWorker Type: %s\nWorkers: %s', name, worker_type, workers)
 
         self.storage = RedisStorage(
@@ -38,13 +39,25 @@ class HueyApplication(object):
             port=redis_port)
         self.name = name
         self.workers = workers
+
+        # Configure application logger 
+        self.log_path = '/tmp/{}.log'.format(redis_prefix)
+        self.log_error_path = '/tmp/{}_error.log'.format(redis_prefix)
+        self._logger.info('Redirect task normal log to {}'.format(self.log_path))
+        self._logger.info('Redirect task error log to {}'.format(self.log_error_path))
+
         if worker_type in ['process', 'greenlet']:
             self.worker_type = worker_type
         else:
             self.worker_type = 'thread'
         self.settings = settings
-        self.python_path = python_path
-        self.script_path = script_path
+
+        # Use open to raise an exception if file is invalid.
+        with open(python_path):
+            self.python_path = python_path
+        
+        with open(script_path):        
+            self.script_path = script_path
 
         self.periodic_tasks = []
         self.use_python3 = use_python3
@@ -139,9 +152,12 @@ class HueyApplication(object):
 
         self._logger.debug('[{}] Execute: {}'.format(self.name, cmd))
 
-        process = subprocess.Popen(
-            cmd,
-            shell=False)
+        with open(self.log_path, 'w') as std_log, open(self.log_error_path, 'w') as error_log:
+            process = subprocess.Popen(
+                cmd,
+                stdout=std_log,
+                stderr=error_log,
+                shell=False)
 
         process_name = cmd[2]
         if process_name == 'enqueue_task':
