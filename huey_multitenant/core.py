@@ -105,32 +105,35 @@ class Dispatcher(object):
         for conf in all_conf:
             if conf.endswith('.conf'):
                 self._logger.info(conf)
-                parser = ConfigParser(defaults={
-                    'workers': '1',
-                    'worker-type': 'thread',
-                    'settings': None,
-                    'redis_host': 'localhost',
-                    'redis_port': '6379',
-                    'redis_prefix': None,
-                    'use_python3': 'false'
-                })
+                try:
+                    parser = ConfigParser(defaults={
+                        'workers': '1',
+                        'worker-type': 'thread',
+                        'settings': None,
+                        'redis_host': 'localhost',
+                        'redis_port': '6379',
+                        'redis_prefix': None,
+                        'use_python3': 'false'
+                    })
 
-                parser.read(os.path.join(conf_path, conf))
-                for section in parser.sections():
+                    parser.read(os.path.join(conf_path, conf))
+                    for section in parser.sections():
 
-                    instance = HueyApplication(
-                        name=parser.get(section, 'redis_prefix'),
-                        python_path=parser.get(section, 'python'),
-                        script_path=parser.get(section, 'script'),
-                        workers=parser.get(section, 'workers'),
-                        worker_type=parser.get(section, 'worker-type'),
-                        settings=parser.get(section, 'settings'),
-                        redis_host=parser.get(section, 'redis_host'),
-                        redis_port=parser.get(section, 'redis_port'),
-                        redis_prefix=parser.get(section, 'redis_prefix') or section,
-                        use_python3=parser.getboolean(section, 'use_python3', fallback=False)
-                    )
-                    self.instances.append(instance)
+                        instance = HueyApplication(
+                            name=parser.get(section, 'redis_prefix'),
+                            python_path=parser.get(section, 'python'),
+                            script_path=parser.get(section, 'script'),
+                            workers=parser.get(section, 'workers'),
+                            worker_type=parser.get(section, 'worker-type'),
+                            settings=parser.get(section, 'settings'),
+                            redis_host=parser.get(section, 'redis_host'),
+                            redis_port=parser.get(section, 'redis_port'),
+                            redis_prefix=parser.get(section, 'redis_prefix') or section,
+                            use_python3=parser.getboolean(section, 'use_python3', fallback=False)
+                        )
+                        self.instances.append(instance)
+                except Exception as e:
+                    self._logger.exception('Error reading config %s', conf)
 
         if len(self.instances) == 0:
             self._logger.error('Check that you have almost one application configured in %s', conf_path)
