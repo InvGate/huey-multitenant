@@ -1,37 +1,18 @@
-import imp
 import logging
 import os
 import sys
 
-from django.apps import apps as django_apps
 from django.utils.module_loading import autodiscover_modules
 from django.core.management.base import BaseCommand
 from huey_multitenant.registry import registry
 
 logger = logging.getLogger(__name__)
 
+
 class Command(BaseCommand):
     help = 'This command creates the schedule.info file with all info about periodic tasks.'
 
-    def autodiscover(self):
-        """Use Django app registry to pull out potential apps with tasks.py module."""
-        module_name = 'tasks'
-        for config in django_apps.get_app_configs():
-            app_path = config.module.__path__
-            try:
-                fp, path, description = imp.find_module(module_name, app_path)
-            except ImportError:
-                continue
-            else:
-                import_path = '%s.%s' % (config.name, module_name)
-                try:
-                    imp.load_module(import_path, fp, path, description)
-                except ImportError:
-                    logger.exception('Found "%s" but error raised attempting '
-                                     'to load module.', import_path)
-
     def handle(self, *args, **options):
-        # self.autodiscover()
         autodiscover_modules("tasks")
         logger.info('Discovering Periodic Tasks:')
         with open(os.path.join(os.path.dirname(sys.argv[0]), 'schedule.info'), 'w') as f:
