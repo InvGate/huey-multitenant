@@ -66,7 +66,7 @@ class Dispatcher(object):
     @property
     def loglevel(self):
         if self.is_verbose is False:
-            return logging.ERROR
+            return logging.INFO
         return logging.DEBUG
 
     def setup_logger(self, logfile):
