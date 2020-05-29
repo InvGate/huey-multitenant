@@ -105,10 +105,7 @@ class Dispatcher(object):
 
         pool = ThreadPoolExecutor(16)
         instances = pool.map(lambda conf: self._load_instances_from_conf(conf, conf_path), all_conf)
-        for instance in instances:
-                if instance is None:
-                    continue
-                self.instances.append(instance)
+        self.instances = [instance for instance in instances if instance is not None]
         pool.shutdown()
         if len(self.instances) == 0:
             self._logger.error('Check that you have almost one application configured in %s', conf_path)
