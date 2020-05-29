@@ -1,4 +1,4 @@
-
+from concurrent.futures.thread import ThreadPoolExecutor
 from configparser import ConfigParser
 import logging
 import os
@@ -101,43 +101,47 @@ class Dispatcher(object):
             self._logger.error('Applications not configured in %s', conf_path)
             sys.exit(1)
 
-        all_conf = os.listdir(conf_path)
-        for conf in all_conf:
-            if conf.endswith('.conf'):
-                self._logger.info(conf)
-                try:
-                    parser = ConfigParser(defaults={
-                        'workers': '1',
-                        'worker-type': 'thread',
-                        'settings': None,
-                        'redis_host': 'localhost',
-                        'redis_port': '6379',
-                        'redis_prefix': None,
-                        'use_python3': 'false'
-                    })
+        all_conf = (conf for conf in os.listdir(conf_path) if conf.endswith('.conf'))
 
-                    parser.read(os.path.join(conf_path, conf))
-                    for section in parser.sections():
-
-                        instance = HueyApplication(
-                            name=parser.get(section, 'redis_prefix'),
-                            python_path=parser.get(section, 'python'),
-                            script_path=parser.get(section, 'script'),
-                            workers=parser.get(section, 'workers'),
-                            worker_type=parser.get(section, 'worker-type'),
-                            settings=parser.get(section, 'settings'),
-                            redis_host=parser.get(section, 'redis_host'),
-                            redis_port=parser.get(section, 'redis_port'),
-                            redis_prefix=parser.get(section, 'redis_prefix') or section,
-                            use_python3=parser.getboolean(section, 'use_python3', fallback=False)
-                        )
-                        self.instances.append(instance)
-                except Exception as e:
-                    self._logger.exception('Error reading config %s', conf)
-
+        pool = ThreadPoolExecutor(16)
+        instances = pool.map(lambda conf: self._load_instances_from_conf(conf, conf_path), all_conf)
+        self.instances = [instance for instance in instances if instance is not None]
+        pool.shutdown()
         if len(self.instances) == 0:
             self._logger.error('Check that you have almost one application configured in %s', conf_path)
             sys.exit(1)
+
+    def _load_instances_from_conf(self, conf, conf_path):
+        self._logger.info(conf)
+        try:
+            parser = ConfigParser(defaults={
+                'workers': '1',
+                'worker-type': 'thread',
+                'settings': None,
+                'redis_host': 'localhost',
+                'redis_port': '6379',
+                'redis_prefix': None,
+                'use_python3': 'false'
+            })
+
+            parser.read(os.path.join(conf_path, conf))
+            for section in parser.sections():
+                instance = HueyApplication(
+                    name=parser.get(section, 'redis_prefix'),
+                    python_path=parser.get(section, 'python'),
+                    script_path=parser.get(section, 'script'),
+                    workers=parser.get(section, 'workers'),
+                    worker_type=parser.get(section, 'worker-type'),
+                    settings=parser.get(section, 'settings'),
+                    redis_host=parser.get(section, 'redis_host'),
+                    redis_port=parser.get(section, 'redis_port'),
+                    redis_prefix=parser.get(section, 'redis_prefix') or section,
+                    use_python3=parser.getboolean(section, 'use_python3', fallback=False)
+                )
+        except Exception as e:
+            self._logger.exception('Error reading config %s', conf)
+            instance = None
+        return instance
 
     def get_task_data(self, task):
         """Convert a message from the queue into a task"""
@@ -173,7 +177,8 @@ class Dispatcher(object):
                     self.consumers.append(HueyConsumer(_instance, task_id))
                     if len(self.instances) > 1:
                         self.instances.append(self.instances.pop(idx))
-                    return
+                    return True
+        return False
 
     def start(self):
         self._logger.info('Start Dispatcher')
@@ -181,8 +186,9 @@ class Dispatcher(object):
         while True:
             try:
                 time.sleep(timeout)
-                if len(self.consumers) < self._total_consumers:
-                    self.consume_task()
+                consumed = True
+                while (len(self.consumers) < self._total_consumers) and consumed:
+                    consumed = self.consume_task()
 
                 self.consumers = [c for c in self.consumers if c.is_running()]
 
