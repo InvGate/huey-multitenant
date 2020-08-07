@@ -60,6 +60,8 @@ class HueyApplication(object):
         try:
             return loads(encoded_data)
         except UnpicklingError:
+            self._logger.error('Error unpickling maintenance mode key {}, using maintenance mode off'.format(
+                self.redis_maintenance_key))
             return False
 
     def load_periodic_tasks(self):

@@ -167,8 +167,6 @@ class Dispatcher(object):
 
     def consume_task(self):
         for idx, _instance in enumerate(self.instances):
-            # if self.instance_is_active(_instance):
-            #     continue
             if _instance.is_in_maintenance_mode():
                 self._logger.info('Instance %s is in maintenance mode, skipping its tasks', _instance.name)
                 continue
