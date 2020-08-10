@@ -15,6 +15,30 @@ HUEY = {
         'workers': 2,
         'scheduler_interval': 5,
     },
+    'connection': {
+        'port': 16379,
+    },
+}
+
+HUEY_CHECK_MAINTENANCE = "django_1.test_app.maintenance.is_in_maintenance"
+
+REDIS_PROTOCOL = 'redis'
+REDIS_HOST = 'localhost'
+REDIS_PORT = 16379
+REDIS_DB = 0
+REDIS_URL = u"{protocol}://{host}:{port}/{db}".format(protocol=REDIS_PROTOCOL,
+                                                      host=REDIS_HOST,
+                                                      port=REDIS_PORT,
+                                                      db=REDIS_DB)
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': REDIS_URL,
+        'KEY_PREFIX': 'django_1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient'
+        }
+    },
 }
 
 SECRET_KEY = 'foo'
