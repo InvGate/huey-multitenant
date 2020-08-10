@@ -2,7 +2,6 @@ import datetime
 import subprocess
 import logging
 import os
-from pickle import loads, UnpicklingError
 import signal
 import threading
 import time
@@ -29,7 +28,6 @@ class HueyApplication(object):
                  redis_host,
                  redis_port,
                  redis_prefix,
-                 redis_maintenance_key,
                  use_python3=False):
         self._logger = logging.getLogger()
         self._logger.info('\nRegister App: %s\nWorker Type: %s\nWorkers: %s', name, worker_type, workers)
@@ -39,7 +37,6 @@ class HueyApplication(object):
             host=redis_host,
             port=redis_port)
         self.name = name
-        self.redis_maintenance_key = redis_maintenance_key
         self.workers = workers
         if worker_type in ['process', 'greenlet']:
             self.worker_type = worker_type
@@ -52,19 +49,6 @@ class HueyApplication(object):
         self.periodic_tasks = []
         self.use_python3 = use_python3
         self.load_periodic_tasks()
-
-    def is_in_maintenance_mode(self):
-        # CAUTION: If you change the logic to decide if the system
-        # is in maintenance mode or not, also change it in neo-assets
-        encoded_data = self.storage.conn.get(self.redis_maintenance_key)
-        if encoded_data is None:
-            return False
-        try:
-            return loads(encoded_data)
-        except UnpicklingError:
-            self._logger.error('Error unpickling maintenance mode key {}, using maintenance mode off'.format(
-                self.redis_maintenance_key))
-            return False
 
     def load_periodic_tasks(self):
         """

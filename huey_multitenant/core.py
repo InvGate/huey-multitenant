@@ -136,7 +136,6 @@ class Dispatcher(object):
                     redis_host=parser.get(section, 'redis_host'),
                     redis_port=parser.get(section, 'redis_port'),
                     redis_prefix=parser.get(section, 'redis_prefix') or section,
-                    redis_maintenance_key=parser.get(section, 'redis_maintenance_key', fallback=None),
                     use_python3=parser.getboolean(section, 'use_python3', fallback=False)
                 )
         except Exception as e:
@@ -167,9 +166,6 @@ class Dispatcher(object):
 
     def consume_task(self):
         for idx, _instance in enumerate(self.instances):
-            if _instance.is_in_maintenance_mode():
-                self._logger.info('Instance %s is in maintenance mode, skipping its tasks', _instance.name)
-                continue
             tasks = _instance.get_pending_tasks()
             for _task in tasks:
                 task_id, task_klass = self.get_task_data(_task)

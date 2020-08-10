@@ -1,5 +1,7 @@
 from __future__ import unicode_literals, absolute_import
 
+from django.conf import settings
+from django.utils.module_loading import import_string
 from huey.consumer import Consumer
 from huey.exceptions import ConfigurationError
 import time
@@ -43,12 +45,22 @@ class ExecuteConsumer(Consumer):
         for _, worker_process in self.worker_threads:
             worker_process.start()
 
+    def check_maintenance_mode(self):
+        if hasattr(settings, 'HUEY_CHECK_MAINTENANCE'):
+            maintenance_path = settings.HUEY_CHECK_MAINTENANCE
+            is_maintenance_on = import_string(maintenance_path)
+            if is_maintenance_on():
+                self._logger.info('MaintenanceMode is on, stopping consumer')
+                exit(0)
+
     def run(self):
         """
         Run the consumer.
         """
         self._logger.info('Start consumer.')
         start_time = time.time()
+
+        self.check_maintenance_mode()
         self.start()
         time.sleep(1.0)
         self.stop_flag.set()
