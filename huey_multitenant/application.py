@@ -54,6 +54,8 @@ class HueyApplication(object):
         self.load_periodic_tasks()
 
     def is_in_maintenance_mode(self):
+        # CAUTION: If you change the logic to decide if the system
+        # is in maintenance mode or not, also change it in neo-assets
         encoded_data = self.storage.conn.get(self.redis_maintenance_key)
         if encoded_data is None:
             return False
