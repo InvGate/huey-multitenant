@@ -20,6 +20,8 @@ HUEY = {
     },
 }
 
+# Location of method to check maintenance status of the app
+# Used by huey-multitenant
 HUEY_CHECK_MAINTENANCE = "django_1.test_app.maintenance.is_in_maintenance"
 
 REDIS_PROTOCOL = 'redis'
