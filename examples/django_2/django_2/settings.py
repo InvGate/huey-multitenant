@@ -16,6 +16,9 @@ HUEY = {
         'workers': 2,
         'scheduler_interval': 5,
     },
+    'connection': {
+        'port': 16379,
+    },
 }
 
 SECRET_KEY = 'foo'

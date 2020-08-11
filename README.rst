@@ -60,6 +60,7 @@ To run the examples make sure that the redis server is up.
 Install Django.
 
 Create a symbolic link inside your virtualenv site-packages to the huey_multitenant folder.
+The current version of huey_multitenant can also be installed using `python setup.py install`.
 
 Create django1.conf file inside bin/conf folder with this content (replace PATH):
 
