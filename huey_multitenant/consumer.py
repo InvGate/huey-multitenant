@@ -64,13 +64,13 @@ class ExecuteConsumer(Consumer):
         last_finished = datetime.utcnow()
         working = False
 
-        def check_total_time():
+        def has_timed_out():
             self._logger.debug("Checking total time")
             return datetime.utcnow() > (start_time + timedelta(seconds=timeout))
         
-        def check_idle_time():
+        def is_idle_since(idle_timeout=1.):
             self._logger.debug("Checking idle time")
-            return (datetime.utcnow() > (last_finished + timedelta(seconds=1.))) and not working
+            return (datetime.utcnow() > (last_finished + timedelta(seconds=idle_timeout))) and not working
 
         listener = self.huey.storage.listener()
 
@@ -89,10 +89,9 @@ class ExecuteConsumer(Consumer):
                         # We may need to handle extra messages differently
                         working = False
 
-            if check_total_time() or check_idle_time():
-                break
-
-        self._stop_worker()
+            if has_timed_out() or is_idle_since():
+                self._stop_worker()
+                return
             
 
     def _stop_worker(self):
