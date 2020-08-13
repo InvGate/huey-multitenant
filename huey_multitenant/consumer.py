@@ -9,6 +9,8 @@ from datetime import timedelta, datetime
 import os
 from json import loads
 
+WORKER_IDLE_TIMEOUT = 1.
+WORKER_TIMEOUT = 20.
 
 class ExecuteConsumer(Consumer):
     """
@@ -55,7 +57,7 @@ class ExecuteConsumer(Consumer):
                 self._logger.info('MaintenanceMode is on, stopping consumer')
                 exit(0)
 
-    def _stop_when_idle(self, start_time, timeout=20.0):
+    def _stop_when_idle(self, start_time, idle_timeout, timeout):
         """
         Stops the workers as soon as they are idle.
         With a maximum of timeout seconds
@@ -68,7 +70,7 @@ class ExecuteConsumer(Consumer):
             self._logger.debug("Checking total time")
             return datetime.utcnow() > (start_time + timedelta(seconds=timeout))
         
-        def is_idle_since(idle_timeout=1.):
+        def is_idle():
             self._logger.debug("Checking idle time")
             return (datetime.utcnow() > (last_finished + timedelta(seconds=idle_timeout))) and not working
 
@@ -89,7 +91,7 @@ class ExecuteConsumer(Consumer):
                         # We may need to handle extra messages differently
                         working = False
 
-            if has_timed_out() or is_idle_since():
+            if has_timed_out() or is_idle():
                 self._stop_worker()
                 return
             
@@ -111,7 +113,7 @@ class ExecuteConsumer(Consumer):
         self.check_maintenance_mode()
         self.start()
 
-        self._stop_when_idle(start_time)
+        self._stop_when_idle(start_time, idle_timeout=WORKER_IDLE_TIMEOUT, timeout=WORKER_TIMEOUT)
 
         total_seconds = (datetime.utcnow() - start_time).total_seconds()
         self._logger.info('Stop consumer. %s seconds' % total_seconds)
