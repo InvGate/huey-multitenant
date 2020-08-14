@@ -10,7 +10,7 @@ import os
 from json import loads
 
 WORKER_IDLE_TIMEOUT = 1.
-WORKER_TIMEOUT = 20.
+WORKER_DEFAULT_TIMEOUT = 20.
 
 class ExecuteConsumer(Consumer):
     """
@@ -113,7 +113,9 @@ class ExecuteConsumer(Consumer):
         self.check_maintenance_mode()
         self.start()
 
-        self._stop_when_idle(start_time, idle_timeout=WORKER_IDLE_TIMEOUT, timeout=WORKER_TIMEOUT)
+        worker_timeout = getattr(settings, 'HUEY_WORKER_TIMEOUT', WORKER_DEFAULT_TIMEOUT)
+
+        self._stop_when_idle(start_time, idle_timeout=WORKER_IDLE_TIMEOUT, timeout=worker_timeout)
 
         total_seconds = (datetime.utcnow() - start_time).total_seconds()
         self._logger.info('Stop consumer. %s seconds' % total_seconds)
