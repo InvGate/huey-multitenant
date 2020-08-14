@@ -2,11 +2,15 @@ from __future__ import unicode_literals, absolute_import
 
 from django.conf import settings
 from django.utils.module_loading import import_string
-from huey.consumer import Consumer
+from huey.consumer import Consumer, EVENT_FINISHED, EVENT_STARTED
 from huey.exceptions import ConfigurationError
-import time
+from time import sleep
+from datetime import timedelta, datetime
 import os
+from json import loads
 
+WORKER_IDLE_TIMEOUT = 1.
+WORKER_DEFAULT_TIMEOUT = 20.
 
 class ExecuteConsumer(Consumer):
     """
@@ -53,18 +57,66 @@ class ExecuteConsumer(Consumer):
                 self._logger.info('MaintenanceMode is on, stopping consumer')
                 exit(0)
 
+    def _stop_when_idle(self, start_time, idle_timeout, timeout):
+        """
+        Stops the workers as soon as they are idle.
+        With a maximum of timeout seconds
+        """
+
+        last_finished = datetime.utcnow()
+        working = False
+
+        def has_timed_out():
+            self._logger.debug("Checking total time")
+            return datetime.utcnow() > (start_time + timedelta(seconds=timeout))
+        
+        def is_idle():
+            self._logger.debug("Checking idle time")
+            return (datetime.utcnow() > (last_finished + timedelta(seconds=idle_timeout))) and not working
+
+        listener = self.huey.storage.listener()
+
+        while True:
+            message = listener.get_message(ignore_subscribe_messages=True, timeout=0.5)
+            if message:
+                event = loads(message['data'].decode('utf-8'))
+                self._logger.debug("Got event from worker: {}".format(event))
+                if event and 'status' in event:
+                    if event['status'] == EVENT_FINISHED:
+                        last_finished = datetime.utcnow()
+                        working = False
+                    elif event['status'] == EVENT_STARTED:
+                        working = True
+                    else:
+                        # We may need to handle extra messages differently
+                        working = False
+
+            if has_timed_out() or is_idle():
+                self._stop_worker()
+                return
+            
+
+    def _stop_worker(self):
+        self._logger.debug('Sending stop signal to workers')
+        self.stop_flag.set()
+        for _, worker_process in self.worker_threads:
+            worker_process.join()
+        
+
     def run(self):
         """
         Run the consumer.
         """
         self._logger.info('Start consumer.')
-        start_time = time.time()
+        start_time = datetime.utcnow()
 
         self.check_maintenance_mode()
         self.start()
-        time.sleep(1.0)
-        self.stop_flag.set()
-        for _, worker_process in self.worker_threads:
-            worker_process.join()
-        self._logger.info('Stop consumer. %s seconds' % (time.time() - start_time))
+
+        worker_timeout = getattr(settings, 'HUEY_WORKER_TIMEOUT', WORKER_DEFAULT_TIMEOUT)
+
+        self._stop_when_idle(start_time, idle_timeout=WORKER_IDLE_TIMEOUT, timeout=worker_timeout)
+
+        total_seconds = (datetime.utcnow() - start_time).total_seconds()
+        self._logger.info('Stop consumer. %s seconds' % total_seconds)
         exit(0)
