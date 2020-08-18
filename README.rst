@@ -52,6 +52,15 @@ Activate virtualenv and launch the dispatcher:
 
 This will create a schedule.info file inside each django instance with peridic tasks information and run the dispatcher.
 
+How to release
+==============
+
+To release just:
+
+1. Update the version on `huey_multitenant/__init__.py`
+2. Run `python setup.py bdist_wheel --universal`
+3. Use the generated `.whl` file under `dist/` on your project.
+
 Examples
 ========
 
