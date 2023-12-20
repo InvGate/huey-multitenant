@@ -114,16 +114,14 @@ class Dispatcher(object):
     def _load_instances_from_conf(self, conf, conf_path):
         self._logger.info(conf)
         try:
-            parser = ConfigParser(defaults={
+            parser = ConfigParser()
+            parser["DEFAULT"] = {
                 'workers': '1',
                 'worker-type': 'thread',
-                'settings': None,
                 'redis_host': 'localhost',
                 'redis_port': '6379',
-                'redis_prefix': None,
                 'use_python3': 'false'
-            })
-
+            }
             parser.read(os.path.join(conf_path, conf))
             for section in parser.sections():
                 instance = HueyApplication(
