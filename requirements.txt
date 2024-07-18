@@ -3,7 +3,7 @@ huey==1.10.3
 redis==2.10.6
 
 # to integrate with sentry
-sentry-sdk==1.14.0
+sentry-sdk==2.8.0
 
 # to run examples you must install:
 # django==1.11.8
